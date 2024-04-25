@@ -57,11 +57,18 @@ void resetPuzzle();
 // Control Center connection instantiation
 MuddEscapes &me = MuddEscapes::getInstance();
 muddescapes_callback callbacks[]{{"Unlock Door", unlockDoor},{"Reset Puzzle", resetPuzzle},{NULL, NULL}};
+
+/*************************************************************************************************/
+/** MODIFY THINGS HERE **/
+// Add additional readers to the muddescapes_variable for them to appear in the control center. Use the
+// same format as the existing variables and make sure not to remove the Null entries at the end.
 muddescapes_variable variables[]{{"Reader 0 Status:", &readerStatus[0]},{"Reader 1 Status:", &readerStatus[1]},{"Reader 2 Status:", &readerStatus[2]},{"Reader 3 Status:", &readerStatus[3]},{"Door Unlocked:", &doorStatus},{NULL, NULL}};
 
+/** STOP MODIFICATIONS HERE **/
+/*************************************************************************************************/
 void setup() 
 {
-  Serial.begin(9600);
+  // Serial.begin(9600); // DEBUG ONLY
   SPI.begin(); // SPI bus
 
   // Initialize each reader object with an rfid reader with appropriate pins and a reader number
@@ -80,12 +87,12 @@ void loop()
 {
   //Wait until new tag is available
   while (checkIDs()) {
-    printIDs(); // Testing only
+    // printIDs(); // DEBUG ONLY
     if (tagMatch()) {
-      Serial.print("Access Granted!\n"); // Testing only
+      // Serial.print("Access Granted!\n"); // DEBUG ONLY
       unlockDoor();
     } else {
-      Serial.print("Incorrect tags!\n"); // Testing only
+      // Serial.print("Incorrect tags!\n"); // DEBUG ONLY
     }
     me.update(); // update control center
     delay(2000);
@@ -95,7 +102,9 @@ void loop()
 //Read new tag if available
 boolean getID(rfidReader reader) 
 {
-  if ( ! reader.mfrc522.PICC_IsNewCardPresent()) { //If a new tag placed on RFID reader continue
+  if ( ! reader.mfrc522.PICC_IsAnyCardPresent()) { //If a tag is placed on RFID reader continue
+    tagIDs[reader.readerNumber] = "0000000";
+    readerStatus[reader.readerNumber] = false;
     return false;
   }
   if ( ! reader.mfrc522.PICC_ReadCardSerial()) { //Since a tag was placed get Serial and continue
@@ -111,6 +120,7 @@ boolean getID(rfidReader reader)
 }
 
 boolean checkIDs(){
+  clearIDs();
   boolean result = false;
   for (int i = 0; i < NUM_READERS; i++) {
     result |= getID(readers[i]);
@@ -129,6 +139,7 @@ boolean tagMatch(){
       readerStatus[i] = true;
     }
   }
+  me.update(); // update control center
   return allMatch;
 }
 
@@ -141,7 +152,7 @@ void printIDs(){
 void unlockDoor(){
   // ADD CODE TO UNLOCK DOOR
   doorStatus = true;
-  Serial.print("Door Unlocked\n");
+  // Serial.print("Door Unlocked\n"); // DEBUG ONLY
 }
 
 void clearIDs(){
@@ -152,8 +163,9 @@ void clearIDs(){
 }
 
 void resetPuzzle(){
-  Serial.print("Puzzle Reset\n");
+  // Serial.print("Puzzle Reset\n"); // DEBUG ONLY
   clearIDs();
   doorStatus = false;
+  me.update(); // update control center
   // ADD CODE TO LOCK DOOR
 }
