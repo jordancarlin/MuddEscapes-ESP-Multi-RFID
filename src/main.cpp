@@ -19,6 +19,7 @@
 /** MODIFY THINGS HERE **/
 #define NUM_READERS 3 // How many RFID Readers
 #define DOOR_PIN 13
+#define DEBUG 0
 
 // 26(A0), 25(A1), 4, 21, 13 (led), 27, 33, 15, 32, 14, 23(SDA)
 
@@ -69,7 +70,9 @@ muddescapes_variable variables[]{{"Reader 0 Status:", &readerStatus[0]},{"Reader
 /*************************************************************************************************/
 void setup() 
 {
-  // Serial.begin(9600); // DEBUG ONLY
+  if(DEBUG) {
+    Serial.begin(9600);
+  }
   SPI.begin(); // SPI bus
 
   // Initialize each reader object with an rfid reader with appropriate pins and a reader number
@@ -90,12 +93,18 @@ void setup()
 void loop() 
 {
   while (checkIDs()) {
-    printIDs(); // DEBUG ONLY
+    if(DEBUG) {
+      printIDs();
+    }
     if (tagMatch()) {
-      // Serial.print("Access Granted!\n"); // DEBUG ONLY
+      if(DEBUG) {
+        Serial.print("Access Granted!\n");
+      }
       unlockDoor();
     } else {
-      // Serial.print("Incorrect tags!\n"); // DEBUG ONLY
+      if(DEBUG) {
+        Serial.print("Incorrect tags!\n");
+      }
     }
     me.update(); // update control center
     delay(2000);
@@ -155,7 +164,9 @@ void printIDs(){
 void unlockDoor(){
   digitalWrite(DOOR_PIN, 0);
   doorStatus = true;
-  // Serial.print("Door Unlocked\n"); // DEBUG ONLY
+  if(DEBUG) {
+    Serial.print("Door Unlocked\n");
+  }
 }
 
 void clearIDs(){
@@ -166,7 +177,9 @@ void clearIDs(){
 }
 
 void resetPuzzle(){
-  // Serial.print("Puzzle Reset\n"); // DEBUG ONLY
+  if(DEBUG) {
+    Serial.print("Puzzle Reset\n");
+  }
   clearIDs();
   doorStatus = false;
   me.update(); // update control center
