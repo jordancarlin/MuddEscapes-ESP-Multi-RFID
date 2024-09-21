@@ -17,7 +17,8 @@
 
 /*************************************************************************************************/
 /** MODIFY THINGS HERE **/
-#define NUM_READERS 4 // How many RFID Readers
+#define NUM_READERS 3 // How many RFID Readers
+#define DOOR_PIN 13
 
 // 26(A0), 25(A1), 4, 21, 13 (led), 27, 33, 15, 32, 14, 23(SDA)
 
@@ -27,9 +28,9 @@
 // Reset pins, SDA pins, and correct tags must be listed in the same order
 // (each reader must have its info at the same index in the reset pins array,
 // the sda pins array, and the correct tags array)
-int rstPins [NUM_READERS] = {14, 4, 26, 15}; // ESP32 pins connected to reset pins of RFID readers
-int sdaPins [NUM_READERS] = {23, 21, 25, 32}; // ESP32 pins connected to SDA pins of RFID readers
-String correctTags [NUM_READERS] = {"4642539", "41D2B38", "4598438", "4A8A24F"}; // Correct RFID tag UIDs
+int rstPins [NUM_READERS] = {4, 26, 15}; // ESP32 pins connected to reset pins of RFID readers
+int sdaPins [NUM_READERS] = {21, 25, 32}; // ESP32 pins connected to SDA pins of RFID readers
+String correctTags [NUM_READERS] = {"41D2B38", "4598438", "4A8A24F"}; // Correct RFID tag UIDs
 
 /** STOP MODIFICATIONS HERE **/
 /*************************************************************************************************/
@@ -62,7 +63,7 @@ muddescapes_callback callbacks[]{{"Unlock Door", unlockDoor},{"Reset Puzzle", re
 /** MODIFY THINGS HERE **/
 // Add additional readers to the muddescapes_variable for them to appear in the control center. Use the
 // same format as the existing variables and make sure not to remove the Null entries at the end.
-muddescapes_variable variables[]{{"Reader 0 Status:", &readerStatus[0]},{"Reader 1 Status:", &readerStatus[1]},{"Reader 2 Status:", &readerStatus[2]},{"Reader 3 Status:", &readerStatus[3]},{"Door Unlocked:", &doorStatus},{NULL, NULL}};
+muddescapes_variable variables[]{{"Reader 0 Status:", &readerStatus[0]},{"Reader 1 Status:", &readerStatus[1]},{"Reader 2 Status:", &readerStatus[2]},{"Door Unlocked:", &doorStatus},{NULL, NULL}};
 
 /** STOP MODIFICATIONS HERE **/
 /*************************************************************************************************/
@@ -78,16 +79,18 @@ void setup()
     readers[i].mfrc522.PCD_Init();
     readers[i].readerNumber = i;
   }
+
+  pinMode(DOOR_PIN, OUTPUT);
   resetPuzzle();
+
   // Initialize control center connection
   me.init("Claremont-ETC", "Cl@remontI0T", "mqtt://broker.hivemq.com", "Door", callbacks, variables);
 }
 
 void loop() 
 {
-  //Wait until new tag is available
   while (checkIDs()) {
-    // printIDs(); // DEBUG ONLY
+    printIDs(); // DEBUG ONLY
     if (tagMatch()) {
       // Serial.print("Access Granted!\n"); // DEBUG ONLY
       unlockDoor();
@@ -150,7 +153,7 @@ void printIDs(){
 }
 
 void unlockDoor(){
-  // ADD CODE TO UNLOCK DOOR
+  digitalWrite(DOOR_PIN, 0);
   doorStatus = true;
   // Serial.print("Door Unlocked\n"); // DEBUG ONLY
 }
@@ -167,5 +170,5 @@ void resetPuzzle(){
   clearIDs();
   doorStatus = false;
   me.update(); // update control center
-  // ADD CODE TO LOCK DOOR
+  digitalWrite(DOOR_PIN, 1);
 }
