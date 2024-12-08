@@ -23,14 +23,11 @@
 
 // 26(A0), 25(A1), 4, 21, 13 (led), 27, 33, 15, 32, 14, 23(SDA)
 
-// int rstPins [NUM_READERS] = {4, 32, 33}; // ESP32 pins connected to reset pins of RFID readers
-// int sdaPins [NUM_READERS] = {23, 14, 21}; // ESP32 pins connected to SDA pins of RFID readers
-
 // Reset pins, SDA pins, and correct tags must be listed in the same order
 // (each reader must have its info at the same index in the reset pins array,
 // the sda pins array, and the correct tags array)
-int rstPins [NUM_READERS] = {4, 26, 15}; // ESP32 pins connected to reset pins of RFID readers
-int sdaPins [NUM_READERS] = {21, 25, 32}; // ESP32 pins connected to SDA pins of RFID readers
+int    rstPins     [NUM_READERS] = {4, 26, 15}; // ESP32 pins connected to reset pins of RFID readers
+int    sdaPins     [NUM_READERS] = {21, 25, 32}; // ESP32 pins connected to SDA pins of RFID readers
 String correctTags [NUM_READERS] = {"41D2B38", "4598438", "4A8A24F"}; // Correct RFID tag UIDs
 
 /** STOP MODIFICATIONS HERE **/
