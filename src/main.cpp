@@ -18,8 +18,7 @@
 /*************************************************************************************************/
 /** MODIFY THINGS HERE **/
 #define NUM_READERS 1 // How many RFID Readers
-#define DOOR_PIN 13
-#define DEBUG 0
+#define DEBUG 1
 
 // 26(A0), 25(A1), 4, 21, 13 (led), 27, 33, 15, 32, 14, 23(SDA)
 
@@ -28,7 +27,7 @@
 // the sda pins array, and the correct tags array)
 int    rstPins     [NUM_READERS] = {4}; // ESP32 pins connected to reset pins of RFID readers
 int    sdaPins     [NUM_READERS] = {21}; // ESP32 pins connected to SDA pins of RFID readers
-String correctTags [NUM_READERS] = {"41D2B38"}; // Correct RFID tag UIDs
+String correctTags [NUM_READERS] = {"8143B326"}; // Correct RFID tag UIDs
 
 /** STOP MODIFICATIONS HERE **/
 /*************************************************************************************************/
@@ -42,26 +41,24 @@ typedef struct rfidReader{
 String tagIDs [NUM_READERS]; // array to store current tag IDs
 rfidReader readers [NUM_READERS]; // array with each reader object
 boolean readerStatus [NUM_READERS]; // if each reader has the correct tag
-boolean doorStatus = false; // is door unlocked
 
 // function prototypes
 boolean getID(rfidReader reader);
 boolean checkIDs();
 boolean tagMatch();
 void printIDs();
-void unlockDoor();
 void clearIDs();
 void resetPuzzle();
 
 // Control Center connection instantiation
 MuddEscapes &me = MuddEscapes::getInstance();
-muddescapes_callback callbacks[]{{"Unlock Door", unlockDoor},{"Reset Puzzle", resetPuzzle},{NULL, NULL}};
+muddescapes_callback callbacks[]{{"Reset RFID", resetPuzzle},{NULL, NULL}};
 
 /*************************************************************************************************/
 /** MODIFY THINGS HERE **/
 // Add additional readers to the muddescapes_variable for them to appear in the control center. Use the
 // same format as the existing variables and make sure not to remove the Null entries at the end.
-muddescapes_variable variables[]{{"Reader 0 Status:", &readerStatus[0]},{"Door Unlocked:", &doorStatus},{NULL, NULL}};
+muddescapes_variable variables[]{{"Clam 1 Status:", &readerStatus[0]},{NULL, NULL}};
 
 /** STOP MODIFICATIONS HERE **/
 /*************************************************************************************************/
@@ -80,16 +77,15 @@ void setup()
     readers[i].readerNumber = i;
   }
 
-  pinMode(DOOR_PIN, OUTPUT);
   resetPuzzle();
 
   // Initialize control center connection
-  me.init("Claremont-ETC", "Cl@remontI0T", "mqtt://broker.hivemq.com", "Door", callbacks, variables);
+  me.init("Claremont-ETC", "Cl@remontI0T", "mqtt://broker.hivemq.com", "Clam 1", callbacks, variables);
 }
 
 void loop()
 {
-  while (checkIDs()) {
+  while (tagMatch() | checkIDs()) {
     if(DEBUG) {
       printIDs();
     }
@@ -97,11 +93,12 @@ void loop()
       if(DEBUG) {
         Serial.print("Access Granted!\n");
       }
-      unlockDoor();
+      me.call_remote_fn("clam", "clam 1 correct");
     } else {
       if(DEBUG) {
         Serial.print("Incorrect tags!\n");
       }
+      me.call_remote_fn("clam", "clam 1 incorrect");
     }
     me.update(); // update control center
     delay(2000);
@@ -158,14 +155,6 @@ void printIDs(){
   }
 }
 
-void unlockDoor(){
-  digitalWrite(DOOR_PIN, 0);
-  doorStatus = true;
-  if(DEBUG) {
-    Serial.print("Door Unlocked\n");
-  }
-}
-
 void clearIDs(){
   for (int i = 0; i < NUM_READERS; i++) {
     tagIDs[i] = "0000000";
@@ -178,7 +167,5 @@ void resetPuzzle(){
     Serial.print("Puzzle Reset\n");
   }
   clearIDs();
-  doorStatus = false;
   me.update(); // update control center
-  digitalWrite(DOOR_PIN, 1);
 }
