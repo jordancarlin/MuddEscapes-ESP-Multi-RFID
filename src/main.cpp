@@ -1,12 +1,12 @@
 /*
- * Reads multiple MFRC522 RFID readers on a single SPI bus 
+ * Reads multiple MFRC522 RFID readers on a single SPI bus
  * and checks that each one matches the predetermined key.
  * The tag-reader pairs are unique so each tag must be placed
  * on the correct reader.
- * 
+ *
  * Jordan Carlin
  * jcarlin@hmc.edu
- * 
+ *
  * Created: April 22, 2024
  * Modified: April 23, 2024
  */
@@ -17,7 +17,7 @@
 
 /*************************************************************************************************/
 /** MODIFY THINGS HERE **/
-#define NUM_READERS 3 // How many RFID Readers
+#define NUM_READERS 1 // How many RFID Readers
 #define DOOR_PIN 13
 #define DEBUG 0
 
@@ -26,9 +26,9 @@
 // Reset pins, SDA pins, and correct tags must be listed in the same order
 // (each reader must have its info at the same index in the reset pins array,
 // the sda pins array, and the correct tags array)
-int    rstPins     [NUM_READERS] = {4, 26, 15}; // ESP32 pins connected to reset pins of RFID readers
-int    sdaPins     [NUM_READERS] = {21, 25, 32}; // ESP32 pins connected to SDA pins of RFID readers
-String correctTags [NUM_READERS] = {"41D2B38", "4598438", "4A8A24F"}; // Correct RFID tag UIDs
+int    rstPins     [NUM_READERS] = {4}; // ESP32 pins connected to reset pins of RFID readers
+int    sdaPins     [NUM_READERS] = {21}; // ESP32 pins connected to SDA pins of RFID readers
+String correctTags [NUM_READERS] = {"41D2B38"}; // Correct RFID tag UIDs
 
 /** STOP MODIFICATIONS HERE **/
 /*************************************************************************************************/
@@ -61,11 +61,11 @@ muddescapes_callback callbacks[]{{"Unlock Door", unlockDoor},{"Reset Puzzle", re
 /** MODIFY THINGS HERE **/
 // Add additional readers to the muddescapes_variable for them to appear in the control center. Use the
 // same format as the existing variables and make sure not to remove the Null entries at the end.
-muddescapes_variable variables[]{{"Reader 0 Status:", &readerStatus[0]},{"Reader 1 Status:", &readerStatus[1]},{"Reader 2 Status:", &readerStatus[2]},{"Door Unlocked:", &doorStatus},{NULL, NULL}};
+muddescapes_variable variables[]{{"Reader 0 Status:", &readerStatus[0]},{"Door Unlocked:", &doorStatus},{NULL, NULL}};
 
 /** STOP MODIFICATIONS HERE **/
 /*************************************************************************************************/
-void setup() 
+void setup()
 {
   if(DEBUG) {
     Serial.begin(9600);
@@ -87,7 +87,7 @@ void setup()
   me.init("Claremont-ETC", "Cl@remontI0T", "mqtt://broker.hivemq.com", "Door", callbacks, variables);
 }
 
-void loop() 
+void loop()
 {
   while (checkIDs()) {
     if(DEBUG) {
@@ -109,7 +109,7 @@ void loop()
 }
 
 //Read new tag if available
-boolean getID(rfidReader reader) 
+boolean getID(rfidReader reader)
 {
   if ( ! reader.mfrc522.PICC_IsAnyCardPresent()) { //If a tag is placed on RFID reader continue
     tagIDs[reader.readerNumber] = "0000000";
