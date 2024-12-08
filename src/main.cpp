@@ -27,7 +27,7 @@
 // the sda pins array, and the correct tags array)
 int    rstPins     [NUM_READERS] = {4}; // ESP32 pins connected to reset pins of RFID readers
 int    sdaPins     [NUM_READERS] = {21}; // ESP32 pins connected to SDA pins of RFID readers
-String correctTags [NUM_READERS] = {"8143B326"}; // Correct RFID tag UIDs
+String correctTags [NUM_READERS] = {"53DA9634"}; // Correct RFID tag UIDs
 
 /** STOP MODIFICATIONS HERE **/
 /*************************************************************************************************/
@@ -58,7 +58,7 @@ muddescapes_callback callbacks[]{{"Reset RFID", resetPuzzle},{NULL, NULL}};
 /** MODIFY THINGS HERE **/
 // Add additional readers to the muddescapes_variable for them to appear in the control center. Use the
 // same format as the existing variables and make sure not to remove the Null entries at the end.
-muddescapes_variable variables[]{{"Clam 1 Status:", &readerStatus[0]},{NULL, NULL}};
+muddescapes_variable variables[]{{"Clam 2 Status:", &readerStatus[0]},{NULL, NULL}};
 
 /** STOP MODIFICATIONS HERE **/
 /*************************************************************************************************/
@@ -80,7 +80,7 @@ void setup()
   resetPuzzle();
 
   // Initialize control center connection
-  me.init("Claremont-ETC", "Cl@remontI0T", "mqtt://broker.hivemq.com", "Clam 1", callbacks, variables);
+  me.init("Claremont-ETC", "Cl@remontI0T", "mqtt://broker.hivemq.com", "Clam 2", callbacks, variables);
 }
 
 void loop()
@@ -93,12 +93,12 @@ void loop()
       if(DEBUG) {
         Serial.print("Access Granted!\n");
       }
-      me.call_remote_fn("clam", "clam 1 correct");
+      me.call_remote_fn("clam", "clam 2 correct");
     } else {
       if(DEBUG) {
         Serial.print("Incorrect tags!\n");
       }
-      me.call_remote_fn("clam", "clam 1 incorrect");
+      me.call_remote_fn("clam", "clam 2 incorrect");
     }
     me.update(); // update control center
     delay(2000);
