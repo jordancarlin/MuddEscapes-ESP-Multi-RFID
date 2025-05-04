@@ -58,7 +58,7 @@ muddescapes_callback callbacks[]{{"Reset RFID", resetPuzzle},{NULL, NULL}};
 /** MODIFY THINGS HERE **/
 // Add additional readers to the muddescapes_variable for them to appear in the control center. Use the
 // same format as the existing variables and make sure not to remove the Null entries at the end.
-muddescapes_variable variables[]{{"Clam 3 Status:", &readerStatus[0]},{NULL, NULL}};
+muddescapes_variable variables[]{{"Painting 1 Status:", &readerStatus[0]},{NULL, NULL}};
 
 /** STOP MODIFICATIONS HERE **/
 /*************************************************************************************************/
